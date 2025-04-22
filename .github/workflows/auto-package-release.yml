@@ -1,0 +1,41 @@
+name: Auto Package and Release Plugin
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Download Dify Plugin CLI
+        run: |
+          mkdir -p $RUNNER_TEMP/bin
+          cd $RUNNER_TEMP/bin
+          wget https://github.com/langgenius/dify-plugin-daemon/releases/download/0.0.6/dify-plugin-linux-amd64
+          chmod +x dify-plugin-linux-amd64
+      - name: Get Plugin Info from manifest.yaml
+        id: meta
+        run: |
+          PLUGIN_NAME=$(grep "^name:" manifest.yaml | cut -d' ' -f2)
+          VERSION=$(grep "^version:" manifest.yaml | cut -d' ' -f2)
+          echo "plugin_name=$PLUGIN_NAME" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+      - name: Package Plugin
+        id: package
+        run: |
+          PACKAGE_NAME="${{ steps.meta.outputs.plugin_name }}-${{ steps.meta.outputs.version }}.difypkg"
+          $RUNNER_TEMP/bin/dify-plugin-linux-amd64 plugin package . -o "$PACKAGE_NAME"
+          echo "package_name=$PACKAGE_NAME" >> $GITHUB_OUTPUT
+      - name: Create GitHub Release and Upload Asset
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.meta.outputs.version }}
+          name: Release ${{ steps.meta.outputs.version }}
+          files: ${{ steps.package.outputs.package_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
