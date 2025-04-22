@@ -1,0 +1,17 @@
+identity:
+  author: lzfxxx
+  name: image-downloader
+  label:
+    en_US: Image Downloader
+    zh_Hans: 图片下载器
+    pt_BR: Baixador de Imagens
+  description:
+    en_US: Download images from URLs
+    zh_Hans: 从URL下载图片
+    pt_BR: Baixar imagens a partir de URLs
+  icon: icon.svg
+tools:
+  - tools/image_downloader.yaml
+extra:
+  python:
+    source: provider/image_downloader.py

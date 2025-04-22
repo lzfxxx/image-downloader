@@ -1,0 +1,30 @@
+identity:
+  name: image_downloader
+  author: lzfxxx
+  label:
+    en_US: Image Downloader
+    zh_Hans: 图片下载器
+    pt_BR: Baixador de Imagens
+description:
+  human:
+    en_US: Download an image from a URL
+    zh_Hans: 从URL下载图片
+    pt_BR: Baixar uma imagem a partir de uma URL
+  llm: A tool that downloads an image from a specified URL and returns it as a binary blob.
+parameters:
+  - name: image_url
+    type: string
+    required: true
+    label:
+      en_US: Image URL
+      zh_Hans: 图片URL
+      pt_BR: URL da Imagem
+    human_description:
+      en_US: The URL of the image to download
+      zh_Hans: 要下载的图片URL
+      pt_BR: A URL da imagem para baixar
+    llm_description: The URL of the image to be downloaded
+    form: llm
+extra:
+  python:
+    source: tools/image_downloader.py
