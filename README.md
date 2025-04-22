@@ -8,6 +8,7 @@
 - 自动检测图片类型并设置正确的 MIME 类型
 - 支持常见图片格式（JPG、PNG、GIF、BMP、WebP 等）
 - 简单易用的接口
+- 解决了 Dify 云版本（udify.app）的 CSP 问题，允许显示来自外部域名的图片
 
 ## 安装方式
 
@@ -33,10 +34,49 @@
 
 ## 示例用法
 
+基本用法：
 ```
 提供图片 URL，插件将下载并返回图片。
 URL: https://example.com/image.jpg
 ```
+
+实际应用场景：
+
+如下图所示，LLM 在回复中输出了 Markdown 格式的图片链接，但由于 CSP 限制，这些外部图片无法直接显示。可以使用以下代码从 LLM 回复中提取图片 URL，再通过本插件下载图片并展示。
+
+```python
+import re
+from typing import Dict
+
+def main(text: str) -> Dict[str, str]:
+    # 匹配 Markdown 图片语法：![xxx](url)
+    match = re.search(r'!\[.*?\]\((https?://[^\s)]+)\)', text)
+    url = match.group(1) if match else ""
+
+    # 去掉图片部分
+    text_without_image = re.sub(r'!\[.*?\]\((https?://[^\s)]+)\)', '', text)
+
+    return {
+        "text": text_without_image.strip(),
+        "url": url
+    }
+```
+
+上述代码可以在 Dify Workflow 中作为 Python 运行时节点使用，提取图片 URL 后传给图片下载器插件，解决 CSP 限制问题。
+
+![使用示例](usage_example.png)
+
+## 解决的问题
+
+这个插件解决了 Dify 云版本（udify.app）中的内容安全策略（CSP）限制问题。当 AI 需要展示来自外部域名的图片时，由于 CSP 限制，这些图片默认无法显示。该插件通过先下载图片，然后通过 blob 方式返回，绕过了 CSP 的限制，使外部图片能够正常显示。
+
+在未使用本插件时，尝试加载外部图片会遇到类似下面的 CSP 错误：
+
+```
+Refused to load the image '...' because it violates the following Content Security Policy directive: "img-src 'self' data: mediastream: blob: filesystem: 'nonce-MDdlNWNlZjYtMzg0MS00ZjI0LTk0ZDAtNWZiNzM5ZjQwNmM3' *.dify.ai *.udify.app udify.app .cloudflareinsights.com .sentry.io http://localhost: http://127.0.0.1: analytics.google.com googletagmanager.com *.googletagmanager.com google-analytics.com api.github.com".
+```
+
+相关问题可参考：[Dify Issue #9878](https://github.com/langgenius/dify/issues/9878)
 
 ## 开发者信息
 
