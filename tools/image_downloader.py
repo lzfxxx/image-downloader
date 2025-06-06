@@ -8,28 +8,28 @@ from dify_plugin.entities.tool import ToolInvokeMessage
 
 class ImageDownloaderTool(Tool):
     def _invoke(self, tool_parameters: dict[str, Any]) -> Generator[ToolInvokeMessage]:
-        # 获取图片 URL 参数
+        # Get image URL parameter
         image_url = tool_parameters.get("image_url", "")
         
         if not image_url:
-            yield self.create_text_message("没有提供图片URL。")
+            yield self.create_text_message("No image URL provided.")
             return
         
         try:
-            # 下载图片
+            # Download image
             image_data = self._download_image(image_url)
             
-            # 从 URL 中提取文件名
+            # Extract filename from URL
             filename = image_url.split('/')[-1]
             
-            # 检测文件扩展名，如果没有则默认为 jpg
+            # Check file extension, default to jpg if none
             if '.' not in filename:
                 filename += '.jpg'
             
-            # 返回成功消息
-            yield self.create_text_message(f"图片 '{filename}' 下载成功")
+            # Return success message
+            yield self.create_text_message(f"Image '{filename}' downloaded successfully")
             
-            # 返回图片数据作为 blob
+            # Return image data as blob
             mime_type = self._get_mime_type(filename)
             yield self.create_blob_message(
                 blob=image_data, 
@@ -39,16 +39,16 @@ class ImageDownloaderTool(Tool):
                 }
             )
         except Exception as e:
-            yield self.create_text_message(f"下载图片时出错: {str(e)}")
+            yield self.create_text_message(f"Error downloading image: {str(e)}")
     
     def _download_image(self, url: str) -> bytes:
-        """从 URL 下载图片并返回二进制数据"""
+        """Download image from URL and return binary data"""
         response = requests.get(url, stream=True)
-        response.raise_for_status()  # 确保请求成功
+        response.raise_for_status()  # Ensure request is successful
         return response.content
     
     def _get_mime_type(self, filename: str) -> str:
-        """根据文件扩展名返回对应的 MIME 类型"""
+        """Return corresponding MIME type based on file extension"""
         ext = filename.split('.')[-1].lower()
         mime_types = {
             'jpg': 'image/jpeg',

@@ -3,10 +3,12 @@ identity:
   name: image-downloader
   label:
     en_US: Image Downloader
+    ja_JP: 画像ダウンローダー
     zh_Hans: 图片下载器
     pt_BR: Baixador de Imagens
   description:
     en_US: Download images from URLs
+    ja_JP: URLから画像をダウンロード
     zh_Hans: 从URL下载图片
     pt_BR: Baixar imagens a partir de URLs
   icon: icon.svg
